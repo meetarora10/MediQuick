@@ -1,3 +1,9 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+
 function App() {
   return (
     <Routes>
@@ -6,7 +12,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected Patient Routes */}
+      {/* Protected Patient Routes
       <Route
         path="/patient_dashboard/*"
         element={
@@ -33,24 +39,24 @@ function App() {
       />
 
       {/* Protected Doctor Routes */}
-      <Route
+      {/* <Route
         path="/doctor_dashboard/*"
         element={
           <ProtectedRoute allowedRoles={['doctor']}>
             <Doctor_dash />
           </ProtectedRoute>
         }
-      />
+      /> */}
 
       {/* Protected Meeting Route */}
-      <Route
+      {/* <Route
         path="/meet/:roomId"
         element={
           <ProtectedRoute>
             <MeetRouteWrapper />
           </ProtectedRoute>
         }
-      />
+      />  */}
     </Routes>
   );
 }
