@@ -9,6 +9,7 @@ auth = Blueprint('auth', __name__)
 # Patient Registration
 @auth.route('/register/patient', methods=['POST'])
 def register_patient():
+    print("Register route hit")
     data = request.get_json()
     if Patients.query.filter_by(email=data.get('email')).first():
         return jsonify(message="Email already registered."), 409
@@ -50,7 +51,7 @@ def login_patient():
     patient = Patients.query.filter_by(email=data.get('email')).first()
     if not patient or not check_password_hash(patient.password_hash, data.get('password')):
         return jsonify(message="Invalid credentials."), 401
-    access_token = create_access_token(identity={"id": patient.id, "role": "patient"})
+    access_token = create_access_token(identity=patient.id)
     return jsonify(access_token=access_token, user={"id": patient.id, "name": patient.name, "email": patient.email, "role": "patient"})
 
 # Doctor Login
@@ -60,5 +61,5 @@ def login_doctor():
     doctor = Doctors.query.filter_by(email=data.get('email')).first()
     if not doctor or not check_password_hash(doctor.password_hash, data.get('password')):
         return jsonify(message="Invalid credentials."), 401
-    access_token = create_access_token(identity={"id": doctor.id, "role": "doctor"})
+    access_token = create_access_token(identity=doctor.id)
     return jsonify(access_token=access_token, user={"id": doctor.id, "name": doctor.name, "email": doctor.email, "role": "doctor"})

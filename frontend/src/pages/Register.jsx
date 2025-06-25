@@ -62,6 +62,7 @@ const Register = () => {
       method: 'POST',
       headers,
       body: submitData,
+      credentials: 'include'
     });
     const data = await res.json();
     if (data.message && (res.status === 201 || data.success)) {

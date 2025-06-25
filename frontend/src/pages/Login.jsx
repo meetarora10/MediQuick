@@ -65,7 +65,9 @@ function Login() {
                     password: '',
                     role: formData.role,
                 });
-                
+                if(data.access_token) {
+                    localStorage.setItem("access_token", data.access_token);
+                }
                 if (data.user && data.user.id) {
                     localStorage.setItem("userId", data.user.id);
                 }
@@ -78,7 +80,7 @@ function Login() {
                     // navigate('/doctor_dashboard');
                 } else if (formData.role === 'patient') {
                     console.log('Patient logged in:', data.user);
-                    // navigate('/patient_dashboard');
+                    navigate('/patient_dashboard');
                 }
             } else {
                 setSuccess(false);

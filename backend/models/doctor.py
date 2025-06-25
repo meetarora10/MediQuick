@@ -13,3 +13,18 @@ class Doctors(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     fees = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "phone": self.phone,
+            "specialty": self.specialty,
+            "clinic_name": self.clinic_name,
+            "clinic_address": self.clinic_address,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "fees": self.fees,
+            "created_at": self.created_at.isoformat()
+        }

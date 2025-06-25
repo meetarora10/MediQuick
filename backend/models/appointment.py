@@ -10,3 +10,16 @@ class Appointments(db.Model):
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     __table_args__ = (db.UniqueConstraint('doctor_id', 'appointment_date', 'start_time', 'end_time', name='unique_appointment_slot'),)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "patient_id": self.patient_id,
+            "doctor_id": self.doctor_id,
+            "appointment_date": self.appointment_date.isoformat(),
+            "start_time": self.start_time.isoformat(),
+            "end_time": self.end_time.isoformat(),
+            "status": self.status,
+            "created_at": self.created_at.isoformat()
+        }
+    

@@ -9,11 +9,7 @@ from routes.doctor import doctor_bp
 from routes.patient import patient_bp
 load_dotenv()  
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"], 
-    supports_credentials=True,
-    allow_headers=["Content-Type", "Authorization", "Accept"],
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    expose_headers=["Set-Cookie"])
+CORS(app, origins="http://localhost:5173", supports_credentials=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')

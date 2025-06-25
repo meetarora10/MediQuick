@@ -3,7 +3,8 @@ import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-
+import Patient_dash from './pages/Patient_dash';
+// import Doctor_dash from './pages/Doctor_dash';
 function App() {
   return (
     <Routes>
@@ -11,7 +12,8 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-
+      <Route path='/patient_dashboard' element={<Patient_dash />} />
+      {/* <Route path='/doctor_dashboard' element={<Doctor_dash />} /> */}
       {/* Protected Patient Routes
       <Route
         path="/patient_dashboard/*"
