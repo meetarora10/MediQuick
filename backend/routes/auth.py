@@ -17,7 +17,9 @@ def register_patient():
         name=data.get('name'),
         email=data.get('email'),
         password_hash=generate_password_hash(data.get('password')),
-        phone=data.get('phone')
+        phone=data.get('phone'),
+        age=data.get('age'),
+        gender=data.get('gender')
     )
     db.session.add(new_patient)
     db.session.commit()
@@ -38,7 +40,10 @@ def register_doctor():
         clinic_name=data.get('clinic_name'),
         clinic_address=data.get('clinic_address'),
         latitude=data.get('latitude'),
-        longitude=data.get('longitude')
+        longitude=data.get('longitude'),
+        age=data.get('age'),
+        gender=data.get('gender'),
+        fees=data.get('fees', 0)  # Default to 0 if not provided
     )
     db.session.add(new_doctor)
     db.session.commit()

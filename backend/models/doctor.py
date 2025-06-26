@@ -13,7 +13,8 @@ class Doctors(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     fees = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-
+    age = db.Column(db.Integer)
+    gender = db.Column(db.String(10))
     def serialize(self):
         return {
             "id": self.id,

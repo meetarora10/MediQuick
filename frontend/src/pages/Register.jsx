@@ -36,17 +36,33 @@ const Register = () => {
     let submitData;
     let headers = {};
     if (formData.role === 'doctor') {
-      submitData = new FormData();
-      submitData.append('name', formData.name);
-      submitData.append('email', formData.email);
-      submitData.append('password', formData.password);
-      submitData.append('phone', formData.phone);
-      submitData.append('specialty', formData.specialty);
-      submitData.append('clinic_name', formData.clinic_name);
-      submitData.append('clinic_address', formData.clinic_address);
-      submitData.append('latitude', formData.latitude);
-      submitData.append('longitude', formData.longitude);
-      submitData.append('fees', formData.fees);
+      submitData = JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        age: formData.age,
+        gender: formData.gender,
+        phone: formData.phone,
+        specialty: formData.specialty,
+        clinic_name: formData.clinic_name,
+        clinic_address: formData.clinic_address,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        fees: formData.fees,
+      });
+      // submitData = new FormData();
+      // submitData.append('name', formData.name);
+      // submitData.append('email', formData.email);
+      // submitData.append('password', formData.password);
+      // submitData.append('age', formData.age);
+      // submitData.append('gender', formData.gender);
+      // submitData.append('phone', formData.phone);
+      // submitData.append('specialty', formData.specialty);
+      // submitData.append('clinic_name', formData.clinic_name);
+      // submitData.append('clinic_address', formData.clinic_address);
+      // submitData.append('latitude', formData.latitude);
+      // submitData.append('longitude', formData.longitude);
+      // submitData.append('fees', formData.fees);
     } else {
       submitData = JSON.stringify({
         name: formData.name,
@@ -167,7 +183,18 @@ const Register = () => {
               <option value="other">Other</option>
             </select>
           </div>
-
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Contact Number:</label>
+            <input
+              type="tel"
+              pattern="[0-9]{10}"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+          </div>
           {formData.role === 'doctor' && (
             <>
               <div>

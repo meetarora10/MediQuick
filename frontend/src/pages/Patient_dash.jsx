@@ -72,35 +72,35 @@ const Patient_dash = () => {
     fetchPatientData();
   }, []);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("access_token");
-  //   if (!token) {
-  //     console.error("No access token found. Redirecting to login.");
-  //     // window.location.href = "/login";
-  //     return;
-  //   }
-  //   navigator.geolocation.getCurrentPosition(
-  //     (position) => {
-  //       const { latitude, longitude } = position.coords;
-  //       fetch("http://localhost:5000/api/update-location", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`
-  //         },
-  //         credentials: "include",
-  //         body: JSON.stringify({ latitude, longitude }),
-  //       })
-  //         .then((res) => res.json())
-  //         .then((data) => console.log("Location updated:", data))
-  //         .catch((err) => console.error("Error updating location:", err));
-  //     },
-  //     (error) => {
-  //       console.error("Geolocation failed:", error);
-  //     },
-  //     { enableHighAccuracy: true }
-  //   );
-  // }, []);
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      console.error("No access token found. Redirecting to login.");
+      // window.location.href = "/login";
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        fetch("http://localhost:5000/api/update-location", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          credentials: "include",
+          body: JSON.stringify({ latitude, longitude }),
+        })
+          .then((res) => res.json())
+          .then((data) => console.log("Location updated:", data))
+          .catch((err) => console.error("Error updating location:", err));
+      },
+      (error) => {
+        console.error("Geolocation failed:", error);
+      },
+      { enableHighAccuracy: true }
+    );
+  }, []);
 
   const handleLogout = () => {
     // Clear tokens, redirect, etc.
@@ -121,9 +121,9 @@ const Patient_dash = () => {
             <ul className="text-gray-700 space-y-1">
               <li><span className="font-medium">Email:</span> {patientData.email}</li>
               <li><span className="font-medium">Phone:</span> {patientData.phone}</li>
-              {/*<li><span className="font-medium">Gender:</span> {patientData.gender}</li>
+              <li><span className="font-medium">Gender:</span> {patientData.gender}</li>
               <li><span className="font-medium">Age:</span> {patientData.age}</li>
-              {/* <li><span className="font-medium">Medical Conditions:</span> {patientData.medicalConditions?.join(", ") || "None"}</li> */}
+              <li><span className="font-medium">Medical Conditions:</span> {patientData.medicalConditions?.join(", ") || "None"}</li>
             </ul>
           </div>
           {/* <div className="flex-1">
@@ -175,8 +175,8 @@ const Patient_dash = () => {
         <h2 className="text-2xl font-semibold mb-4">Profile Details</h2>
         <ul className="text-gray-700 space-y-2">
           <li><span className="font-medium">Name:</span> {patientData.name}</li>
-          {/* <li><span className="font-medium">Age:</span> {patientData.age}</li>
-          <li><span className="font-medium">Gender:</span> {patientData.gender}</li> */}
+          <li><span className="font-medium">Age:</span> {patientData.age}</li>
+          <li><span className="font-medium">Gender:</span> {patientData.gender}</li>
           <li><span className="font-medium">Email:</span> {patientData.email}</li>
           <li><span className="font-medium">Phone:</span> {patientData.phone}</li>
           <li><span className="font-medium">Medical Conditions:</span> {patientData.medicalConditions?.join(", ") || "None"}</li>
@@ -200,7 +200,12 @@ const Patient_dash = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col">
       {/* Top Navbar */}
       <nav className="bg-white shadow flex items-center justify-between px-6 py-4">
-        <div className="text-xl font-bold text-blue-700 tracking-wide">MediQuick</div>
+                                <span
+                            className="bg-gradient-to-r from-blue-400 via-cyan-500 to-teal-400 bg-clip-text text-transparent drop-shadow-md"
+                            style={{ WebkitTextStroke: '0.5px rgba(0,0,0,0.08)' }}
+                        >
+                            MediQuick
+                        </span>
         <button
           onClick={handleLogout}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition"

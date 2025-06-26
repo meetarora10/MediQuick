@@ -9,7 +9,8 @@ class Patients(db.Model):
     last_known_lat = db.Column(db.Float, nullable=True)
     last_known_lng = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-
+    age = db.Column(db.Integer)
+    gender = db.Column(db.String(10))
     def serialize(self):
         return {
             "id": self.id,
@@ -18,5 +19,7 @@ class Patients(db.Model):
             "phone": self.phone,
             "last_known_lat": self.last_known_lat,
             "last_known_lng": self.last_known_lng,
-            "created_at": self.created_at.isoformat()
+            "created_at": self.created_at.isoformat(),
+            "age": self.age,
+            "gender": self.gender,
         }
