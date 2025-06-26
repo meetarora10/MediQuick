@@ -50,6 +50,7 @@ const Register = () => {
         longitude: formData.longitude,
         fees: formData.fees,
       });
+      headers['Content-Type'] = 'application/json';
       // submitData = new FormData();
       // submitData.append('name', formData.name);
       // submitData.append('email', formData.email);

@@ -1,7 +1,8 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, set_access_cookies
 from flask import Blueprint, jsonify, request
 from database import db
-from models import Patients, Doctors
+from models.patient import Patients
+from models.doctor import Doctors
 from werkzeug.security import generate_password_hash, check_password_hash
 
 auth = Blueprint('auth', __name__)
@@ -28,6 +29,7 @@ def register_patient():
 # Doctor Registration
 @auth.route('/register/doctor', methods=['POST'])
 def register_doctor():
+    print("Register route hit doctor.")
     data = request.get_json()
     if Doctors.query.filter_by(email=data.get('email')).first():
         return jsonify(message="Email already registered."), 409

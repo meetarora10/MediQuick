@@ -27,5 +27,7 @@ class Doctors(db.Model):
             "latitude": self.latitude,
             "longitude": self.longitude,
             "fees": self.fees,
+            "age": self.age,
+            "gender": self.gender,
             "created_at": self.created_at.isoformat()
         }

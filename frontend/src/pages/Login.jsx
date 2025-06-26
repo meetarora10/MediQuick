@@ -77,7 +77,7 @@ function Login() {
                 
                 if (formData.role === 'doctor') {
                     console.log('Doctor logged in:', data.user);
-                    // navigate('/doctor_dashboard');
+                    navigate('/doctor_dashboard');
                 } else if (formData.role === 'patient') {
                     console.log('Patient logged in:', data.user);
                     navigate('/patient_dashboard');
