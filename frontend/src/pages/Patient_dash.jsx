@@ -4,6 +4,7 @@ const TABS = [
   { id: "home", label: "Home" },
   { id: "appointments", label: "Appointments" },
   { id: "profile", label: "Profile" },
+  { id: "find", label: "Find Doctor" },
   { id: "logout", label: "Logout" },
 ];
 
@@ -11,6 +12,8 @@ const Patient_dash = () => {
   const [activeTab, setActiveTab] = useState("home");
   const [patientData, setPatientData] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPatientData = async () => {
@@ -94,6 +97,26 @@ const Patient_dash = () => {
           .then((res) => res.json())
           .then((data) => console.log("Location updated:", data))
           .catch((err) => console.error("Error updating location:", err));
+        return fetch(`${import.meta.env.VITE_BACKEND_URL}/api/doctors-nearby`, {
+          method: 'GET',
+          headers:{
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        })
+        .then((res) => res.json().then((data) => ({ status: res.status, data })))
+          .then(({ status, data }) => {
+            if (status === 200) {
+              setDoctors(data);
+            } else {
+              setError(data.message || 'Failed to fetch doctors');
+            }
+          })
+          .catch((err) => {
+            console.error('Error fetching doctors:', err);
+            setError('An error occurred while fetching doctors.');
+          });
       },
       (error) => {
         console.error("Geolocation failed:", error);
@@ -104,8 +127,15 @@ const Patient_dash = () => {
 
   const handleLogout = () => {
     // Clear tokens, redirect, etc.
-    localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
     window.location.href = "/login";
+  };
+
+  const handleGetDirections = (address) => {
+    if (!address) return;
+    const encodedAddress = encodeURIComponent(address);
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+    window.open(mapsUrl, '_blank');
   };
 
   let content = null;
@@ -194,6 +224,39 @@ const Patient_dash = () => {
   } else if (activeTab === "logout") {
     handleLogout();
     content = null;
+  } else if (activeTab === "find") {
+    content = (
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">Find a Doctor</h2>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="font-bold text-lg mb-2">Nearby Doctors</h3>
+          {doctors.length === 0 ? (
+            <div className="text-gray-500">No doctors found nearby.</div>
+          ) : (
+            <ul className="space-y-4">
+              {doctors.map((doctor, idx) => (
+                <li key={idx} className="border p-4 rounded-lg">
+                  <h4 className="font-semibold text-lg">{doctor.name}</h4>
+                  <p><span className="font-medium">Specialty:</span> {doctor.specialty}</p>
+                  <p><span className="font-medium">Clinic:</span> {doctor.clinic_name}</p>
+                  <p><span className="font-medium">Address:</span> {doctor.clinic_address}</p>
+                  <p><span className="font-medium">Phone:</span> {doctor.phone}</p>
+                  <button className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer">
+                    Book Appointment
+                  </button>
+                  <button
+                    className="mt-2 mx-3 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
+                    onClick={() => handleGetDirections(doctor.clinic_address)}
+                  >
+                    Get Directions
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          </div>
+      </div>
+    );
   }
 
   return (
