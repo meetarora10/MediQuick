@@ -51,7 +51,7 @@ def login_patient():
     patient = Patients.query.filter_by(email=data.get('email')).first()
     if not patient or not check_password_hash(patient.password_hash, data.get('password')):
         return jsonify(message="Invalid credentials."), 401
-    access_token = create_access_token(identity=patient.id)
+    access_token = create_access_token(identity=str(patient.id))
     return jsonify(access_token=access_token, user={"id": patient.id, "name": patient.name, "email": patient.email, "role": "patient"})
 
 # Doctor Login
@@ -61,5 +61,5 @@ def login_doctor():
     doctor = Doctors.query.filter_by(email=data.get('email')).first()
     if not doctor or not check_password_hash(doctor.password_hash, data.get('password')):
         return jsonify(message="Invalid credentials."), 401
-    access_token = create_access_token(identity=doctor.id)
+    access_token = create_access_token(identity=str(doctor.id))
     return jsonify(access_token=access_token, user={"id": doctor.id, "name": doctor.name, "email": doctor.email, "role": "doctor"})

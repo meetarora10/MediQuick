@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from models.patient import Patients
 from models.appointment import Appointments
+from models.doctor import Doctors
 from datetime import datetime
 from database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
@@ -15,11 +16,17 @@ def patient_dashboard():
         if not patient:
             return jsonify({"success": False, "message": "Patient not found"}), 404
         appointments = Appointments.query.filter_by(patient_id=patient.id).all()
+        appointments_data = []
+        for a in appointments:
+            appt_dict = a.serialize()
+            doctor = Doctors.query.get(a.doctor_id)
+            appt_dict["doctorName"] = doctor.name if doctor else None
+            appointments_data.append(appt_dict)
         return jsonify({
             "success": True,
             "data": {
                 "patient": patient.serialize(),
-                "appointments": [a.serialize() for a in appointments]
+                "appointments": appointments_data
             }
         }), 200
     except Exception as e:

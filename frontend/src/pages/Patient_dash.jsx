@@ -33,7 +33,7 @@ const Patient_dash = () => {
         });
         const data = await res.json();
         if (data.success) {
-          setPatientData(data.data);
+          setPatientData(data.data.patient);
           setAppointments(data.data.appointments || []);
         } else {
           // setPatientData({
@@ -72,35 +72,35 @@ const Patient_dash = () => {
     fetchPatientData();
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      console.error("No access token found. Redirecting to login.");
-      // window.location.href = "/login";
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        fetch("http://localhost:5000/api/update-location", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          credentials: "include",
-          body: JSON.stringify({ latitude, longitude }),
-        })
-          .then((res) => res.json())
-          .then((data) => console.log("Location updated:", data))
-          .catch((err) => console.error("Error updating location:", err));
-      },
-      (error) => {
-        console.error("Geolocation failed:", error);
-      },
-      { enableHighAccuracy: true }
-    );
-  }, []);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("access_token");
+  //   if (!token) {
+  //     console.error("No access token found. Redirecting to login.");
+  //     // window.location.href = "/login";
+  //     return;
+  //   }
+  //   navigator.geolocation.getCurrentPosition(
+  //     (position) => {
+  //       const { latitude, longitude } = position.coords;
+  //       fetch("http://localhost:5000/api/update-location", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`
+  //         },
+  //         credentials: "include",
+  //         body: JSON.stringify({ latitude, longitude }),
+  //       })
+  //         .then((res) => res.json())
+  //         .then((data) => console.log("Location updated:", data))
+  //         .catch((err) => console.error("Error updating location:", err));
+  //     },
+  //     (error) => {
+  //       console.error("Geolocation failed:", error);
+  //     },
+  //     { enableHighAccuracy: true }
+  //   );
+  // }, []);
 
   const handleLogout = () => {
     // Clear tokens, redirect, etc.
@@ -119,10 +119,10 @@ const Patient_dash = () => {
           <div className="flex-1">
             <h3 className="font-bold text-lg mb-2">Profile Overview</h3>
             <ul className="text-gray-700 space-y-1">
-              <li><span className="font-medium">Age:</span> {patientData.age}</li>
-              <li><span className="font-medium">Gender:</span> {patientData.gender}</li>
               <li><span className="font-medium">Email:</span> {patientData.email}</li>
               <li><span className="font-medium">Phone:</span> {patientData.phone}</li>
+              {/*<li><span className="font-medium">Gender:</span> {patientData.gender}</li>
+              <li><span className="font-medium">Age:</span> {patientData.age}</li>
               {/* <li><span className="font-medium">Medical Conditions:</span> {patientData.medicalConditions?.join(", ") || "None"}</li> */}
             </ul>
           </div>
@@ -157,8 +157,8 @@ const Patient_dash = () => {
               <tbody>
                 {appointments.map((appt, idx) => (
                   <tr key={idx} className="border-t">
-                    <td className="py-2 px-4">{appt.date || "-"}</td>
-                    <td className="py-2 px-4">{appt.time || "-"}</td>
+                    <td className="py-2 px-4">{appt.appointment_date || "-"}</td>
+                    <td className="py-2 px-4">{appt.start_time || "-"}</td>
                     <td className="py-2 px-4">{appt.doctorName || "-"}</td>
                     <td className="py-2 px-4">{appt.status || "Scheduled"}</td>
                   </tr>
@@ -175,8 +175,8 @@ const Patient_dash = () => {
         <h2 className="text-2xl font-semibold mb-4">Profile Details</h2>
         <ul className="text-gray-700 space-y-2">
           <li><span className="font-medium">Name:</span> {patientData.name}</li>
-          <li><span className="font-medium">Age:</span> {patientData.age}</li>
-          <li><span className="font-medium">Gender:</span> {patientData.gender}</li>
+          {/* <li><span className="font-medium">Age:</span> {patientData.age}</li>
+          <li><span className="font-medium">Gender:</span> {patientData.gender}</li> */}
           <li><span className="font-medium">Email:</span> {patientData.email}</li>
           <li><span className="font-medium">Phone:</span> {patientData.phone}</li>
           <li><span className="font-medium">Medical Conditions:</span> {patientData.medicalConditions?.join(", ") || "None"}</li>
