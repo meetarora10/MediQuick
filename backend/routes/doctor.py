@@ -51,22 +51,21 @@ def get_doctors_nearby():
     try:
         user_id = get_jwt_identity()
         user = Patients.query.get(user_id)
-        
         if not user:
             return jsonify({"success": False, "message": "Patient not found"}), 404
-        
         # Check if user has location data
         if not user.last_known_lat or not user.last_known_lng:
             return jsonify({"success": False, "message": "User location not available"}), 400
-        
-        all_doctors = Doctors.query.all()
+        specialty = request.args.get('specialty')
+        if specialty:
+            all_doctors = Doctors.query.filter(Doctors.specialty.ilike(f"%{specialty}%")).all()
+        else:
+            all_doctors = Doctors.query.all()
         result = []
-        
         for doc in all_doctors:
             # Check if doctor has location data
             if doc.latitude is None or doc.longitude is None:
                 continue
-                
             dist = haversine(user.last_known_lat, user.last_known_lng, doc.latitude, doc.longitude)
             result.append({
                 "id": doc.id,

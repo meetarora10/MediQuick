@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import DoctorSearch from "../components/DoctorSearch";
 const TABS = [
   { id: "home", label: "Home" },
   { id: "appointments", label: "Appointments" },
@@ -14,6 +14,12 @@ const Patient_dash = () => {
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  // Edit profile states
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editProfileData, setEditProfileData] = useState(null);
+  const [editProfileLoading, setEditProfileLoading] = useState(false);
+  const [editProfileError, setEditProfileError] = useState(null);
 
   useEffect(() => {
     const fetchPatientData = async () => {
@@ -125,6 +131,36 @@ const Patient_dash = () => {
     );
   }, []);
 
+  useEffect(() => {
+    if (activeTab !== "find") return;
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+    let url = `${import.meta.env.VITE_BACKEND_URL}/api/doctors-nearby`;
+    // Always fetch all doctors, filter client-side
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    })
+      .then((res) => res.json().then((data) => ({ status: res.status, data })))
+      .then(({ status, data }) => {
+        if (status === 200 && Array.isArray(data)) {
+          setDoctors(data);
+          setError(null);
+        } else {
+          setDoctors([]);
+          setError(data.message || 'Failed to fetch doctors');
+        }
+      })
+      .catch((err) => {
+        setDoctors([]);
+        setError('An error occurred while fetching doctors.');
+      });
+  }, [activeTab, searchTerm]);
+
   const handleLogout = () => {
     // Clear tokens, redirect, etc.
     localStorage.removeItem("access_token");
@@ -136,6 +172,29 @@ const Patient_dash = () => {
     const encodedAddress = encodeURIComponent(address);
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
     window.open(mapsUrl, '_blank');
+  };
+
+  // Add a function to fetch appointments only
+  const fetchAppointments = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/patient_dashboard`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppointments(data.data.appointments || []);
+      }
+    } catch (err) {
+      // ignore
+    }
   };
 
   let content = null;
@@ -200,62 +259,217 @@ const Patient_dash = () => {
       </div>
     );
   } else if (activeTab === "profile") {
-    content = (
-      <div className="max-w-xl mx-auto bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-semibold mb-4">Profile Details</h2>
-        <ul className="text-gray-700 space-y-2">
-          <li><span className="font-medium">Name:</span> {patientData.name}</li>
-          <li><span className="font-medium">Age:</span> {patientData.age}</li>
-          <li><span className="font-medium">Gender:</span> {patientData.gender}</li>
-          <li><span className="font-medium">Email:</span> {patientData.email}</li>
-          <li><span className="font-medium">Phone:</span> {patientData.phone}</li>
-          <li><span className="font-medium">Medical Conditions:</span> {patientData.medicalConditions?.join(", ") || "None"}</li>
-        </ul>
-        {/* <div className="mt-6">
-          <h3 className="font-bold text-lg mb-2">Emergency Contact</h3>
-          <ul className="text-gray-700 space-y-1">
-            <li><span className="font-medium">Name:</span> {patientData.emergencyContact?.name}</li>
-            <li><span className="font-medium">Relation:</span> {patientData.emergencyContact?.relation}</li>
-            <li><span className="font-medium">Phone:</span> {patientData.emergencyContact?.phone}</li>
+    if (isEditingProfile && editProfileData) {
+      content = (
+        <div className="max-w-xl mx-auto bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-semibold mb-4">Edit Profile</h2>
+          {editProfileError && <div className="text-red-500 mb-2">{editProfileError}</div>}
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setEditProfileLoading(true);
+              setEditProfileError(null);
+              try {
+                const token = localStorage.getItem("access_token");
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/patient/profile`, {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                  },
+                  credentials: "include",
+                  body: JSON.stringify(editProfileData),
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                  setPatientData(data.data.patient || editProfileData);
+                  setIsEditingProfile(false);
+                } else {
+                  setEditProfileError(data.message || "Failed to update profile.");
+                }
+              } catch (err) {
+                setEditProfileError("An error occurred while updating profile.");
+              } finally {
+                setEditProfileLoading(false);
+              }
+            }}
+          >
+            <div className="space-y-4">
+              <div>
+                <label className="block font-medium">Name</label>
+                <input
+                  type="text"
+                  className="border rounded px-3 py-1 w-full"
+                  value={editProfileData.name || ""}
+                  onChange={e => setEditProfileData({ ...editProfileData, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-medium">Age</label>
+                <input
+                  type="number"
+                  className="border rounded px-3 py-1 w-full"
+                  value={editProfileData.age || ""}
+                  onChange={e => setEditProfileData({ ...editProfileData, age: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-medium">Gender</label>
+                <select
+                  className="border rounded px-3 py-1 w-full"
+                  value={editProfileData.gender || ""}
+                  onChange={e => setEditProfileData({ ...editProfileData, gender: e.target.value })}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block font-medium">Email</label>
+                <input
+                  type="email"
+                  className="border rounded px-3 py-1 w-full"
+                  value={editProfileData.email || ""}
+                  onChange={e => setEditProfileData({ ...editProfileData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-medium">Phone</label>
+                <input
+                  type="text"
+                  className="border rounded px-3 py-1 w-full"
+                  value={editProfileData.phone || ""}
+                  onChange={e => setEditProfileData({ ...editProfileData, phone: e.target.value })}
+                  required
+                />
+              </div>
+              {/* <div>
+                <label className="block font-medium">Medical Conditions (comma separated)</label>
+                <input
+                  type="text"
+                  className="border rounded px-3 py-1 w-full"
+                  value={editProfileData.medicalConditions ? editProfileData.medicalConditions.join(", ") : ""}
+                  onChange={e => setEditProfileData({ ...editProfileData, medicalConditions: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
+                />
+              </div> */}
+            </div>
+            <div className="mt-6 flex gap-4">
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                disabled={editProfileLoading}
+              >
+                {editProfileLoading ? "Saving..." : "Save"}
+              </button>
+              <button
+                type="button"
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                onClick={() => { setIsEditingProfile(false); setEditProfileError(null); }}
+                disabled={editProfileLoading}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      );
+    } else {
+      content = (
+        <div className="max-w-xl mx-auto bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-semibold mb-4">Profile Details</h2>
+          <ul className="text-gray-700 space-y-2">
+            <li><span className="font-medium">Name:</span> {patientData.name}</li>
+            <li><span className="font-medium">Age:</span> {patientData.age}</li>
+            <li><span className="font-medium">Gender:</span> {patientData.gender}</li>
+            <li><span className="font-medium">Email:</span> {patientData.email}</li>
+            <li><span className="font-medium">Phone:</span> {patientData.phone}</li>
+            <li><span className="font-medium">Medical Conditions:</span> {patientData.medicalConditions?.join(", ") || "None"}</li>
           </ul>
-        </div> */}
-      </div>
-    );
+          <button
+            className="mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onClick={() => {
+              setEditProfileData({
+                name: patientData.name || "",
+                age: patientData.age || "",
+                gender: patientData.gender || "",
+                email: patientData.email || "",
+                phone: patientData.phone || "",
+                medicalConditions: patientData.medicalConditions || [],
+              });
+              setIsEditingProfile(true);
+            }}
+          >
+            Edit Profile
+          </button>
+        </div>
+      );
+    }
   } else if (activeTab === "logout") {
     handleLogout();
     content = null;
   } else if (activeTab === "find") {
     content = (
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">Find a Doctor</h2>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="font-bold text-lg mb-2">Nearby Doctors</h3>
-          {doctors.length === 0 ? (
-            <div className="text-gray-500">No doctors found nearby.</div>
-          ) : (
-            <ul className="space-y-4">
-              {doctors.map((doctor, idx) => (
-                <li key={idx} className="border p-4 rounded-lg">
-                  <h4 className="font-semibold text-lg">{doctor.name}</h4>
-                  <p><span className="font-medium">Specialty:</span> {doctor.specialty}</p>
-                  <p><span className="font-medium">Clinic:</span> {doctor.clinic_name}</p>
-                  <p><span className="font-medium">Address:</span> {doctor.clinic_address}</p>
-                  <p><span className="font-medium">Phone:</span> {doctor.phone}</p>
-                  <button className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer">
-                    Book Appointment
-                  </button>
-                  <button
-                    className="mt-2 mx-3 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
-                    onClick={() => handleGetDirections(doctor.clinic_address)}
-                  >
-                    Get Directions
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          </div>
-      </div>
+      <DoctorSearch
+        doctors={doctors}
+        error={error}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        handleGetDirections={handleGetDirections}
+        onAppointmentBooked={fetchAppointments}
+      />
+      // <div>
+      //   <h2 className="text-2xl font-semibold mb-4">Find a Doctor</h2>
+      //   <div className="bg-white rounded-lg shadow p-6">
+      //     {/* Search Input */}
+      //     <div className="mb-4">
+      //       <input
+      //         type="text"
+      //         placeholder="Search doctors by specialty or name or symptom..."
+      //         value={searchTerm}
+      //         onChange={e => setSearchTerm(e.target.value)}
+      //         className="border rounded px-3 py-1 w-full"
+      //       />
+      //     </div>
+      //     {/* Doctors List */}
+      //     {error ? (
+      //       <div className="text-red-500">{error}</div>
+      //     ) : doctors.length === 0 ? (
+      //       <div className="text-gray-500">No doctors found{searchTerm ? " for your search." : " nearby."}</div>
+      //     ) : (
+      //       <ul className="space-y-4">
+      //         {doctors.map((doctor, idx) => (
+      //           <li key={idx} className="border p-4 rounded-lg">
+      //             <h4 className="font-semibold text-lg">{doctor.name}</h4>
+      //             <p><span className="font-medium">Specialty:</span> {doctor.specialty}</p>
+      //             <p><span className="font-medium">Clinic:</span> {doctor.clinic_name}</p>
+      //             <p><span className="font-medium">Address:</span> {doctor.clinic_address}</p>
+      //             <p><span className="font-medium">Phone:</span> {doctor.phone}</p>
+      //             <p><span className="font-medium">Fees:</span> ₹{doctor.fees} </p>
+      //             {doctor.distance_km !== undefined && (
+      //               <p><span className="font-medium">Distance:</span> {doctor.distance_km} km</p>
+      //             )}
+      //             <button className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer">
+      //               Book Appointment
+      //             </button>
+      //             <button
+      //               className="mt-2 mx-3 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
+      //               onClick={() => handleGetDirections(doctor.clinic_address)}
+      //             >
+      //               <FaLocationDot className="inline mr-1" />
+      //               Get Directions
+      //             </button>
+      //           </li>
+      //         ))}
+      //       </ul>
+      //     )}
+      //   </div>
+      // </div>
     );
   }
 
