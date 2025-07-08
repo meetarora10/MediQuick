@@ -8,6 +8,7 @@ from routes.auth import auth
 from routes.doctor import doctor_bp
 from routes.patient import patient_bp
 from routes.nlp import nlp_bp
+from routes.appointment import appointment_bp 
 import openai
 load_dotenv()  
 app = Flask(__name__)
@@ -25,6 +26,7 @@ app.register_blueprint(auth, url_prefix='/api')
 app.register_blueprint(doctor_bp)
 app.register_blueprint(patient_bp)
 app.register_blueprint(nlp_bp)
+app.register_blueprint(appointment_bp)
 def db_init():
     with app.app_context():
         db.create_all()

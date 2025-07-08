@@ -197,6 +197,30 @@ const Patient_dash = () => {
     }
   };
 
+  // Add cancel appointment handler
+  const handleCancelAppointment = async (appointmentId) => {
+    if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointments/${appointmentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        fetchAppointments();
+      } else {
+        alert(data.message || 'Failed to cancel appointment.');
+      }
+    } catch (err) {
+      alert('An error occurred while cancelling appointment.');
+    }
+  };
+
   let content = null;
   if (!patientData) {
     content = <div className="text-center py-10 text-gray-500">Loading...</div>;
@@ -241,6 +265,7 @@ const Patient_dash = () => {
                   <th className="py-2 px-4">Time</th>
                   <th className="py-2 px-4">Doctor</th>
                   <th className="py-2 px-4">Status</th>
+                  <th className="py-2 px-4">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -250,6 +275,14 @@ const Patient_dash = () => {
                     <td className="py-2 px-4">{appt.start_time || "-"}</td>
                     <td className="py-2 px-4">{appt.doctorName || "-"}</td>
                     <td className="py-2 px-4">{appt.status || "Scheduled"}</td>
+                    <td className="py-2 px-4">
+                      <button
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                        onClick={() => handleCancelAppointment(appt.id)}
+                      >
+                        Cancel
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

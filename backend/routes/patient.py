@@ -67,37 +67,37 @@ def update_patient_profile():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-@patient_bp.route('/api/appointments', methods=['POST'])
-@jwt_required()
-def book_appointment():
-    try:
-        patient_id = get_jwt_identity()
-        data = request.get_json()
-        doctor_id = data.get('doctor_id')
-        appointment_date = data.get('appointment_date')
-        start_time = data.get('start_time')
-        end_time = data.get('end_time')
-        if not all([doctor_id, appointment_date, start_time, end_time]):
-            return jsonify({'success': False, 'message': 'Missing required fields'}), 400
-        # Check for slot conflict
-        existing = Appointments.query.filter_by(
-            doctor_id=doctor_id,
-            appointment_date=appointment_date,
-            start_time=start_time,
-            end_time=end_time
-        ).first()
-        if existing:
-            return jsonify({'success': False, 'message': 'This slot is already booked.'}), 409
-        new_appt = Appointments(
-            patient_id=patient_id,
-            doctor_id=doctor_id,
-            appointment_date=appointment_date,
-            start_time=start_time,
-            end_time=end_time,
-            status='Scheduled'
-        )
-        db.session.add(new_appt)
-        db.session.commit()
-        return jsonify({'success': True, 'data': {'appointment': new_appt.serialize()}}), 201
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+# @patient_bp.route('/api/appointments', methods=['POST'])
+# @jwt_required()
+# def book_appointment():
+#     try:
+#         patient_id = get_jwt_identity()
+#         data = request.get_json()
+#         doctor_id = data.get('doctor_id')
+#         appointment_date = data.get('appointment_date')
+#         start_time = data.get('start_time')
+#         end_time = data.get('end_time')
+#         if not all([doctor_id, appointment_date, start_time, end_time]):
+#             return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+#         # Check for slot conflict
+#         existing = Appointments.query.filter_by(
+#             doctor_id=doctor_id,
+#             appointment_date=appointment_date,
+#             start_time=start_time,
+#             end_time=end_time
+#         ).first()
+#         if existing:
+#             return jsonify({'success': False, 'message': 'This slot is already booked.'}), 409
+#         new_appt = Appointments(
+#             patient_id=patient_id,
+#             doctor_id=doctor_id,
+#             appointment_date=appointment_date,
+#             start_time=start_time,
+#             end_time=end_time,
+#             status='Scheduled'
+#         )
+#         db.session.add(new_appt)
+#         db.session.commit()
+#         return jsonify({'success': True, 'data': {'appointment': new_appt.serialize()}}), 201
+#     except Exception as e:
+#         return jsonify({'success': False, 'message': str(e)}), 500
