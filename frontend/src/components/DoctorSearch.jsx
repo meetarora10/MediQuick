@@ -165,7 +165,7 @@ const DoctorSearch = ({ doctors, error, searchTerm, setSearchTerm, handleGetDire
           <ul className="space-y-4">
             {filteredDoctors.map((doctor, idx) => (
               <li key={idx} className="border p-4 rounded-lg">
-                <h4 className="font-semibold text-lg">{doctor.name}</h4>
+                <h4 className="font-semibold text-lg">Dr. {doctor.name}</h4>
                 <p><span className="font-medium">Specialty:</span> {doctor.specialty}</p>
                 <p><span className="font-medium">Clinic:</span> {doctor.clinic_name}</p>
                 <p><span className="font-medium">Address:</span> {doctor.clinic_address}</p>
@@ -201,7 +201,7 @@ const DoctorSearch = ({ doctors, error, searchTerm, setSearchTerm, handleGetDire
               >
                 &times;
               </button>
-              <h3 className="text-xl font-semibold mb-4">Book Appointment with {selectedDoctor.name}</h3>
+              <h3 className="text-xl font-semibold mb-4">Book Appointment with Dr. {selectedDoctor.name}</h3>
               <form onSubmit={handleBookAppointment} className="space-y-4">
                 <div>
                   <label className="block font-medium">Date</label>
@@ -233,10 +233,11 @@ const DoctorSearch = ({ doctors, error, searchTerm, setSearchTerm, handleGetDire
                     required
                   />
                 </div>
+                <h3>Fees: ₹{selectedDoctor.fees}</h3>
                 {bookingError && <div className="text-red-500">{bookingError}</div>}
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  className="bg-blue-500 cursor-pointer text-white px-4 py-2 rounded hover:bg-blue-600"
                   disabled={bookingLoading}
                 >
                   {bookingLoading ? "Booking..." : "Book"}

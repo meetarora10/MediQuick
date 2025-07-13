@@ -53,9 +53,27 @@ def book_appointment():
 def cancel_appointment(appointment_id):
     try:
         user_id = get_jwt_identity()
-        appt = Appointments.query.filter_by(id=appointment_id, patient_id=user_id).first()
+        # Check if user is a patient or doctor
+        from models.patient import Patients
+        from models.doctor import Doctors
+        
+        # First check if user is a patient
+        patient = Patients.query.get(user_id)
+        if patient:
+            # Patient can only cancel their own appointments
+            appt = Appointments.query.filter_by(id=appointment_id, patient_id=user_id).first()
+        else:
+            # Check if user is a doctor
+            doctor = Doctors.query.get(user_id)
+            if doctor:
+                # Doctor can cancel appointments where they are the doctor
+                appt = Appointments.query.filter_by(id=appointment_id, doctor_id=user_id).first()
+            else:
+                return jsonify(success=False, message="User not found."), 404
+        
         if not appt:
             return jsonify(success=False, message="Appointment not found or not authorized."), 404
+        
         db.session.delete(appt)
         db.session.commit()
         return jsonify(success=True, message="Appointment cancelled successfully.")

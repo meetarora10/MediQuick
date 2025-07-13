@@ -34,7 +34,12 @@ def doctor_dashboard():
         if not doctor:
             return jsonify({"success": False, "message": "Doctor not found"}), 404
         appointments = Appointments.query.filter_by(doctor_id=doctor.id).all()
-        appointments_data = [a.serialize() for a in appointments]
+        appointments_data = []
+        for a in appointments:
+            appt_dict = a.serialize()
+            patient = Patients.query.get(a.patient_id)
+            appt_dict["patientName"] = patient.name if patient else None
+            appointments_data.append(appt_dict)
         return jsonify({
             "success": True,
             "data": {
@@ -83,4 +88,22 @@ def get_doctors_nearby():
         return jsonify(result), 200
     except Exception as e:
         print(f"Error in get_doctors_nearby: {str(e)}")
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@doctor_bp.route('/api/doctor/profile', methods=['PUT'])
+@jwt_required()
+def update_doctor_profile():
+    try:
+        doctor_id = get_jwt_identity()
+        doctor = Doctors.query.get(doctor_id)
+        if not doctor:
+            return jsonify({"success": False, "message": "Doctor not found"}), 404
+        data = request.get_json()
+        # Only update fields that exist in the model
+        for field in ["name", "email", "phone", "age", "gender", "specialty", "clinic_name", "clinic_address", "fees"]:
+            if field in data:
+                setattr(doctor, field, data[field])
+        db.session.commit()
+        return jsonify({"success": True, "data": {"doctor": doctor.serialize()}}), 200
+    except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
