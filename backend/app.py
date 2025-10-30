@@ -12,7 +12,7 @@ from routes.appointment import appointment_bp
 import openai
 load_dotenv()  
 app = Flask(__name__)
-CORS(app, origins="http://localhost:5173", supports_credentials=True)
+CORS(app, origins=["https://medi-quick-um5b-ldxpsgo1m-meet-aroras-projects.vercel.app"], supports_credentials=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
